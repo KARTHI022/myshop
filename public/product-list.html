@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Product List</title>
+
+</head>
+
+<body>
+
+    <div >
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="text-center" style="text-align: center; border: 2px solid #817f7f; padding: 10px; background-color:rgb(82, 82, 87);color: rgb(247, 250, 252);">OUR PRODUCTS</h3>
+                <a href="http://localhost:3000/" class="btn btn-primary ml-2" style="text-align: center;position: absolute;left: 12px;top:12vh">Home </a><br><br><br>
+    
+
+                <table class="table table-bordered table-striped"style="border: 2px solid rgb(165, 161, 161);">
+                    <thead class="thead-light dark" >
+                        <tr>
+                            <th class="text-center">CD_ID</th>
+                            <th class="text-center">PD_ID</th>
+                            <th class="text-center">PRODUCT_NAME</th>
+                            <th class="text-center">NAME</th>
+                            <th class="text-center">BRAND</th>
+                            <th class="text-center">MRP</th>
+                            <th class="text-center">DISCOUNT_PRICE</th>
+                            <th class="text-center">STOCKS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tBody">
+                        
+                    </tbody>
+                </table>
+
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center" id="pagination">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+        let totalProducts = 0;
+        let currentCategoryId;
+        function loadProducts(categoryId) {
+    fetch(`/products/api/category/${categoryId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(results => {
+            if (!results) {
+                console.error('Error: Results are undefined.');
+                return;
+            }
+
+            totalProducts = results.length;
+            updatePagination();
+            filterProducts(currentPage, results);
+        })
+        .catch(error => {
+            console.error('Error fetching products by category:', error);
+        });
+}
+
+        function filterProducts(page, results) {
+    currentPage = page || 1;
+
+    
+    if (!results) {
+        console.error('Results are undefined.');
+        return;
+    }
+
+    const startIdx = (currentPage - 1) * pageSize;
+    const endIdx = startIdx + pageSize;
+
+    let row = "";
+    results.slice(startIdx, endIdx).forEach(val => {
+        row += `<tr>
+                  <td class="text-center">${val.CD_ID}</td>
+                  <td class="text-center">${val.PD_ID}</td>
+                  <td>${val.PRODUCT_NAME}</td>
+                  <td>${val.NAME}</td>
+                  <td>${val.BRAND}</td>
+                  <td class="text-center">${val.MRP}</td>
+                  <td class="text-center">${val.DISCOUNT_PRICE}</td>
+                  <td class="text-center">${val.STOCKS}</td>
+                </tr>`;
+    });
+
+    document.getElementById('tBody').innerHTML = row;
+    updatePagination();
+}
+
+function changePage(page) {
+    const newPage = currentPage + page;
+
+    if (newPage >= 1 && newPage <= Math.ceil(totalProducts / pageSize)) {
+        currentPage = newPage;
+        updateUrl(currentCategoryId); // Call updateUrl with the currentCategoryId when changing the page
+        loadProducts(currentCategoryId);
+    }
+}
+
+
+
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalProducts > 0) {
+                const totalPages = Math.ceil(totalProducts / pageSize);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement('li');
+                    li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                    const a = document.createElement('a');
+                    a.className = 'page-link';
+                    a.href = '#';
+                    a.innerText = i;
+                    a.onclick = () => changePage(i - currentPage);
+                    li.appendChild(a);
+                    pagination.appendChild(li);
+                }
+            }
+        }
+        function updateUrl(categoryId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('categoryId', categoryId);
+        url.searchParams.set('page', currentPage); // Add this line to include the current page
+        history.pushState({}, '', url);
+    }
+    window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        currentCategoryId = urlParams.get('categoryId');
+        currentPage = parseInt(urlParams.get('page')) || 1; // Set currentPage from the URL or default to 1
+
+        if (currentCategoryId) {
+            loadProducts(currentCategoryId);
+        } else {
+            console.error('Category ID not provided in the URL.');
+        }
+    };
+</script>
+
+</body>
+
+</html>

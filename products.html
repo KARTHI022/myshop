@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>Shopping Website</title>
+</head>
+<body>
+
+<div class="container">
+  <div class="row mb-3">
+    <div class="col-md-12 filter-container">
+      <h3 class="text-center" style="text-align: center; border: 2px solid #817f7f; padding: 10px; background-color:rgb(81, 81, 83);color: rgb(237, 242, 245);">OUR PRODUCTS</h3>
+      
+      <div class="form-inline justify-content" style="position: absolute; right: 100px; top: 12vh;">
+        <label for="categoryFilter" class="mr-2">Select your Category:</label>
+        <select class="form-control mr-2" id="categoryFilter" onchange="filterProducts(1)">
+          <option value="0">All Categories</option>
+          <option value="1">Electronics</option>
+          <option value="2">Baby Toys</option>
+          <option value="3">Books</option> 
+          <option value="4">Clothing</option>
+          <option value="5">Cosmetics</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="input-group w-25" style="position: absolute; right: 600px; top: 13vh;">
+    <form id = "formsubmit">
+    <input type="text" class="form-control" placeholder="Search..." id="searchInput">
+    <button type = submit style="visibility: hidden;">search</button>
+    </form>
+    <!-- <div class="input-group-append">
+        <a href="http://localhost:3001/search?q=${query}"    button class="btn btn-primary ml-2" type="button" onclick="search()" style="position: absolute; right: 200px; top: 1vh;">Search</button></a>
+    </div> -->
+</div>
+  <a href="http://localhost:3000/" class="btn btn-primary ml-2">Home</a><br><br>
+
+ 
+
+  <div class="row">
+    <div class="col-md-12">
+      <table class="table table-bordered table-striped" style="border: 2px solid rgb(165, 161, 161);">
+        <thead class="thead-light dark">
+          <tr>
+            <th class="text-center">CD_ID</th>
+            <th class="text-center">PD_ID</th>
+            <th class="text-center">PRODUCT_NAME</th>
+            <th class="text-center">NAME</th>
+            <th class="text-center">BRAND</th>
+            <th class="text-center">MRP</th>
+            <th class="text-center">DISCOUNT_PRICE</th>
+            <th class="text-center">STOCKS</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"></tbody>
+      </table>
+    
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+  document.getElementById("formsubmit").onsubmit = function(e)
+  {
+    e.preventDefault();
+    var query = document.getElementById('searchInput').value.toLowerCase();
+    console.log(query)
+        window.location.href=`/search?q=${query}`;
+
+  }
+  let currentPage = 1;
+  const pageSize = 10;
+  let totalProducts = 0;
+
+  
+  function filterProducts(page) {
+    currentPage = page || 1;
+    const selectedCategoryId = document.getElementById('categoryFilter').value;
+
+    fetch('/products/api')
+      .then(response => response.json())
+      .then(results => {
+        let filteredResults = results;
+        if (selectedCategoryId !== '0') {
+          filteredResults = results.filter(val => val.CD_ID == selectedCategoryId);
+        }
+
+        totalProducts = filteredResults.length;
+
+        let row = "";
+        const startIdx = (currentPage - 1) * pageSize;
+        const endIdx = startIdx + pageSize;
+
+        filteredResults.slice(startIdx, endIdx).forEach(val => {
+          row += `<tr>
+                    <td class="text-center">${val.CD_ID}</td>
+                    <td class="text-center">${val.PD_ID}</td>
+                    <td>${val.PRODUCT_NAME}</td>
+                    <td>${val.NAME}</td>
+                    <td class="text-center">${val.BRAND}</td>
+                    <td class="text-center">${val.MRP}</td>
+                    <td class="text-center">${val.DISCOUNT_PRICE}</td>
+                    <td class="text-center">${val.STOCKS}</td>
+                  </tr>`;
+        });
+
+        document.getElementById('tBody').innerHTML = row;
+        updatePagination();
+
+        updateUrl(selectedCategoryId);
+        updateUrl()
+      });
+  }
+
+ 
+  filterProducts(1);
+
+
+  function changePage(page) {
+    filterProducts(currentPage + page);
+  }
+
+ 
+  function updatePagination() {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+
+    if (totalProducts > 0) {
+      const totalPages = Math.ceil(totalProducts / pageSize);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.innerText = i;
+        a.onclick = () => changePage(i - currentPage);
+        li.appendChild(a);
+        pagination.appendChild(li);
+      }
+    }
+  }
+  function updateUrl() {
+  const url = new URL(window.location.href);
+  const categoryId = document.getElementById('categoryFilter').value || '0';
+  url.searchParams.set('categoryId', categoryId);
+  url.searchParams.set('page', currentPage);
+  history.pushState({}, '', url);
+}
+
+window.onload = function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  let categoryId = urlParams.get('categoryId') || '0';
+  const page = parseInt(urlParams.get('page')) || 1;
+
+  console.log('categoryId:', categoryId);
+  console.log('page:', page);
+
+  document.getElementById('categoryFilter').value = categoryId;
+  filterProducts(page);
+};
+ 
+
+  
+    const urlParams=new URLSearchParams(window.location.search);
+        let query=urlParams.get("q");
+        searchAndDisplayData();
+        async function searchAndDisplayData() {
+            const searchTerm = query;
+      
+            try {
+                console.log(123)
+                let response = await fetch(`http://localhost:3001/search/data?q=${searchTerm}`);
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    updateProductTable(data);
+                } else {
+                    console.error('Unexpected response format. Expected JSON.');
+                    // Display a message for unexpected response format
+                    const unexpectedFormatMessage = document.createElement('tr');
+                    unexpectedFormatMessage.innerHTML = `<td colspan="8">Unexpected response format. Expected JSON.</td>`;
+                    document.querySelector('tbody').appendChild(unexpectedFormatMessage);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error.message);
+                // Display an error message to the user
+                const errorMessage = document.createElement('tr');
+                errorMessage.innerHTML = `<td colspan="8">Error fetching data: ${error.message}</td>`;
+                document.querySelector('tbody').appendChild(errorMessage);
+            }
+        }
+
+        function updateProductTable(data) {
+            const productTableBody = document.querySelector('#tBody');
+            productTableBody.innerHTML = ''; // Clear previous content
+
+            if (data.length > 0) {
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="text-center">${item._source.CD_ID}</td>
+                        <td class="text-center">${item._source.PD_ID}</td>
+                        <td>${item._source.PRODUCT_NAME}</td>
+                        <td>${item._source.NAME}</td>
+                        <td class="text-center" >${item._source.BRAND}</td>
+                        <td class="text-center">${item._source.MRP}</td>
+                        <td class="text-center">${item._source.DISCOUNT_PRICE}</td>
+                        <td class="text-center">${item._source.STOCKS}</td>
+                    `;
+                    productTableBody.appendChild(row);
+                });
+            } else {
+                // Display a message when no data is found
+                const noDataMessage = document.createElement('tr');
+                // noDataMessage.innerHTML = '<td colspan="8">No matching products found.</td>';
+                productTableBody.appendChild(noDataMessage);
+            }
+        }
+        function search(){
+        var query = document.getElementById('searchInput').value.toLowerCase();
+        window.location.href=`/search?q=${query}`;
+      }
+
+
+
+</script>
+</body>
+</html>
