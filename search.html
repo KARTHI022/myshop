@@ -13,7 +13,7 @@
     <div class="col-md-12 filter-container">
       <h3 class="text-center" style="text-align: center; border: 2px solid #817f7f; padding: 10px; background-color:rgb(81, 81, 83);color: rgb(237, 242, 245);">OUR PRODUCTS</h3>
       
-      <div class="form-inline justify-content" style="position: absolute; right: 100px; top: 12vh;">
+      <!-- <div class="form-inline justify-content" style="position: absolute; right: 100px; top: 12vh;">
         <label for="categoryFilter" class="mr-2">Select your Category:</label>
         <select class="form-control mr-2" id="categoryFilter" onchange="filterProducts(1)">
           <option value="0">All Categories</option>
@@ -23,7 +23,7 @@
           <option value="4">Clothing</option>
           <option value="5">Cosmetics</option>
         </select>
-      </div>
+      </div> -->
     </div>
   </div>
   <div class="input-group w-25" style="position: absolute; right: 600px; top: 13vh;">
@@ -32,7 +32,7 @@
     <button type = submit style="visibility: hidden;">search</button>
     </form>
 </div>
-  <a href="http://localhost:3000/" class="btn btn-primary ml-2">Home</a><br><br>
+  <a href="/categoryPage" class="btn btn-primary ml-2">Home</a><br><br>
 
  
 
@@ -90,7 +90,7 @@ document.getElementById("formsubmit").onsubmit = function(e)
       
             try {
                 console.log(123)
-                let response = await fetch(`http://localhost:3001/search/data?q=${searchTerm}`);
+                let response = await fetch(`/search/data?q=${searchTerm}`);
 
     
                 if (!response.ok) {

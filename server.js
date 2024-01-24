@@ -5,11 +5,15 @@ const path=require('path')
 const app = express();
 const PORT = 3000;
 const cors = require('cors')
+require('dotenv').config();
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'myshop'
+  host:process.env.MY_HOST,
+  port:process.env.MY_PORT,
+  user:process.env.MY_USER,
+  password:process.env.MY_PASSWORD,
+  database: process.env.MY_DATABASE,
+  connectTimeout: 60000,
+  
 });
 connection.connect(err => {
   if (err) {
@@ -105,17 +109,17 @@ app.get('/products/api/category/:categoryId', (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://${process.env.MY_HOST}:${PORT}`);
 });
 
 // ---------------------------------------------------------------------
 
 
 
-const elasticsearch = require('elasticsearch');
+const elasticsearch = require('@elastic/elasticsearch');
   
 const client = new elasticsearch.Client({
-  
+  node:`http://${process.env.MY_HOST}:9200`,
   log: 'info',
 });
 
@@ -186,7 +190,7 @@ app.get('/search/data', async (req, res) => {
 
 
 
-const port = 3001;
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+// const port = 3001;
+// app.listen(port, () => {
+//   console.log(`Server is running on http://localhost:${port}`);
+// });

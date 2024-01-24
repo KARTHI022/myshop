@@ -35,7 +35,7 @@
         <a href="http://localhost:3001/search?q=${query}"    button class="btn btn-primary ml-2" type="button" onclick="search()" style="position: absolute; right: 200px; top: 1vh;">Search</button></a>
     </div> -->
 </div>
-  <a href="http://localhost:3000/" class="btn btn-primary ml-2">Home</a><br><br>
+  <a href="/categoryPage" class="btn btn-primary ml-2">Home</a><br><br>
 
  
 
@@ -180,7 +180,7 @@ window.onload = function () {
       
             try {
                 console.log(123)
-                let response = await fetch(`http://localhost:3001/search/data?q=${searchTerm}`);
+                let response = await fetch(`/search/data?q=${searchTerm}`);
     
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);

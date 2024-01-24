@@ -16,7 +16,7 @@
       
           <button class="btn btn-primary ml-2" type="button"   id="Searching" onclick="searchAndDisplayData()"  >Search</button>
           <div id="searchResult"></div> -->
-      <a href="http://localhost:3000/products" class="btn btn-primary ml-2" style="text-align: center;position: absolute;right: 10px;top:12vh">View All Products</a><br>
+      <a href="/products" class="btn btn-primary ml-2" style="text-align: center;position: absolute;right: 10px;top:12vh">View All Products</a><br>
     </div>
   </div>
 
@@ -63,10 +63,10 @@
 
   function fetchProducts(categoryId) {
  
-  window.location.href = `http://localhost:3000/product-list.html?categoryId=${categoryId}&page=1#`;
+  window.location.href = `/product-list.html?categoryId=${categoryId}&page=1#`;
 }
   
-  fetch('http://localhost:3000/category') 
+  fetch('/category') 
     .then(response => response.json())
     .then(results => {
       generateCategoryLinks(results);
